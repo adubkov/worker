@@ -16,6 +16,8 @@ func (s *HttpServer) Run(port string) {
 }
 
 func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
+    statusCode := 400
+    result := "FAIL"
 	req.ParseForm()
 	_, ok := req.Form["id"]
 	if ok && len(req.Form["id"][0]) > 0 {
@@ -35,12 +37,11 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 		// respond as OK if 'id' is exist and not nil
-		res.WriteHeader(200)
-		fmt.Fprintf(res, "OK")
-	} else {
-		res.WriteHeader(400)
-		fmt.Fprintf(res, "FAIL")
+        statusCode = 200
+        result = "OK"
 	}
+    res.WriteHeader(statusCode)
+    fmt.Fprintf(res, result)
 }
 
 func (s *HttpServer) queueEvent(action Action, id string) {
