@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-    "sync"
+	"sync"
 	"time"
 )
 
@@ -18,7 +18,7 @@ processQueue:
 	for {
 		select {
 		case event := <-queue:
-            wg.Add(1)
+			wg.Add(1)
 			go processEvent(event, queue)
 		case <-stop:
 			log.Printf("[INFO] Stopping queue processing.")
@@ -45,7 +45,7 @@ func processRetry(event Event) bool {
 func processEvent(event Event, queue chan Event) {
 	var ok bool = false
 	var out string
-    defer wg.Done()
+	defer wg.Done()
 
 	if !processRetry(event) {
 		return
@@ -97,7 +97,7 @@ func loadFromFile(file string, data *[]Event) error {
 func saveState(queue chan Event) {
 	var events []Event
 	log.Printf("[INFO] Waiting untill events processing will done")
-    wg.Wait()
+	wg.Wait()
 	for {
 		select {
 		case event := <-queue:
@@ -141,7 +141,7 @@ func main() {
 	defer close(stop)
 
 	// Load configuration
-    actions = NewActionsMap(configDir)
+	actions = NewActionsMap(configDir)
 
 	// Load saved state
 	loadedEvents := []Event{}
@@ -157,5 +157,5 @@ func main() {
 	go signalDispatcher(queue, stop)
 
 	// Run HTTP server
-    new(HttpServer).Run(port)
+	new(HttpServer).Run(port)
 }
