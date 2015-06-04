@@ -6,21 +6,18 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-	"os"
 )
 
 func saveToFile(file string, data interface{}) error {
-	f, e := os.Create(file)
-	defer f.Close()
-	if e != nil {
-		return e
-	}
 	strData, e := yaml.Marshal(data)
 	if e != nil {
 		return e
 	}
-	f.WriteString(string(strData))
-	return e
+	e = ioutil.WriteFile(file, strData, 0644)
+	if e != nil {
+		return e
+	}
+	return nil
 }
 
 func loadFromFile(file string, data interface{}) error {
@@ -29,7 +26,7 @@ func loadFromFile(file string, data interface{}) error {
 		return e
 	}
 	yaml.Unmarshal([]byte(f), data)
-	return e
+	return nil
 }
 
 // Pretty print structure as YAML.
