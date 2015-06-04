@@ -4,18 +4,23 @@ import (
     "fmt"
     "time"
     "log"
+    "sync"
     "gopkg.in/yaml.v2"
 )
 
 type Queue struct {
     queue chan Event
     stop chan bool
+    wg sync.WaitGroup
+    file string
 }
 
-func NewQueue(size int) *Queue {
+func NewQueue(size int, file string) *Queue {
     q := new(Queue)
     q.queue = make(chan Event, size)
     q.stop = make(chan bool, 1)
+    q.file = file
+    q.load()
     return q
 }
 
@@ -39,7 +44,7 @@ processQueue:
     for {
         select {
         case event := <-q.queue:
-            wg.Add(1)
+            q.wg.Add(1)
             go q.processEvent(event)
         case <- q.stop:
             log.Printf("[INFO] Stopping queue processing.")
@@ -54,7 +59,7 @@ processQueue:
 func (q *Queue) processEvent(event Event) {
     var ok bool = false
     var out string
-    defer wg.Done()
+    defer q.wg.Done()
 
     if !q.processRetry(event) {
         return
@@ -99,17 +104,25 @@ func (q *Queue) processRetry(event Event) bool {
 func (q *Queue) save() {
     var events []Event
     log.Printf("[INFO] Waiting untill events processing will done")
-    wg.Wait()
+    q.wg.Wait()
     for {
         select {
         case event := <-q.queue:
             events = append(events, event)
         default:
-            log.Printf("[INFO] Saving events to %s", stateFile)
+            log.Printf("[INFO] Saving events to %s", q.file)
             data, _ := yaml.Marshal(&events)
-            saveToFile(stateFile, string(data))
+            saveToFile(q.file, string(data))
             log.Printf("[INFO] %d events saved", len(events))
             return
         }
+    }
+}
+
+func (q *Queue) load() {
+    events := []Event{}
+    loadFromFile(q.file, &events)
+    for _, event := range events {
+        q.Put(event)
     }
 }

@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 )
 
 func saveToFile(file string, data string) error {
@@ -45,25 +44,17 @@ var actions ActionsMap
 var timeout = [...]int{1, 5, 15, 30, 60, 180, 3600, 86400}
 var port string = "8080"
 var configDir string = "./config"
-var stateFile string = "/tmp/worker.state"
+var queueFile string = "/tmp/worker.state"
 var stop chan bool
-var wg sync.WaitGroup
 var queueSize int = 10000
 
 func main() {
 	log.Println("[INFO] Elastica Worker!")
 
-    queue = NewQueue(queueSize)
-
 	// Load configuration
 	actions = NewActionsMap(configDir)
 
-	// Load saved state
-	loadedEvents := []Event{}
-	loadFromFile(stateFile, &loadedEvents)
-	for _, event := range loadedEvents {
-		queue.Put(event)
-	}
+    queue = NewQueue(queueSize, queueFile)
 
 	// Process events queue
 	go queue.Process()
