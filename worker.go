@@ -32,7 +32,7 @@ func main() {
 	// Load configuration
 	actions = NewActionsMap(configDir)
 
-    // Make queue object
+	// Make queue object
 	queue = NewQueue(queueSize, queueFile)
 
 	// Run queue events process

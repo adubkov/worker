@@ -52,7 +52,9 @@ func (am *ActionsMap) loadActions(path string) {
 	for _, file := range files {
 		file_name := path + "/" + file
 		a := Actions{}
-		loadFromFile(file_name, &a)
+		if nil != loadFromFile(file_name, &a) {
+			log.Fatalf("[ERROR] Can not load %s", file_name)
+		}
 		log.Printf("[INFO] Loaded %s", file_name)
 
 		// Merge

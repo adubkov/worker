@@ -110,8 +110,11 @@ func (q *Queue) save() {
 			events = append(events, event)
 		default:
 			log.Printf("[INFO] Saving events to %s", q.file)
-			saveToFile(q.file, &events)
-			log.Printf("[INFO] %d events saved", len(events))
+			if nil != saveToFile(q.file, &events) {
+				log.Printf("[ERROR] Can not load %s", q.file)
+			} else {
+				log.Printf("[INFO] %d events saved", len(events))
+			}
 			return
 		}
 	}
@@ -119,8 +122,12 @@ func (q *Queue) save() {
 
 func (q *Queue) load() {
 	events := []Event{}
-	loadFromFile(q.file, &events)
+	if nil != loadFromFile(q.file, &events) {
+		log.Printf("[WARN] Can not load %s", q.file)
+	}
+
 	for _, event := range events {
 		q.Put(event)
 	}
+	log.Printf("[INFO] %d events loaded", len(events))
 }
