@@ -26,11 +26,11 @@ func actionCurl(event Event) (string, bool) {
     // Make http request.
     res, e := client.Get(event.Action.Cmd)
     if e != nil {
-        return "FAIL", false
+        return "http.Get error", false
     }
     // If respond success, we are ok.
     if res.StatusCode != 200 {
-        return "FAIL", false
+        return string(res.StatusCode), false
     }
     defer res.Body.Close()
     out, _ := ioutil.ReadAll(res.Body)

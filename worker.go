@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+    "sync"
 	"time"
 )
 
@@ -17,6 +18,7 @@ processQueue:
 	for {
 		select {
 		case event := <-queue:
+            wg.Add(1)
 			go processEvent(event, queue)
 		case <-stop:
 			log.Printf("[INFO] Stopping queue processing.")
@@ -43,6 +45,7 @@ func processRetry(event Event) bool {
 func processEvent(event Event, queue chan Event) {
 	var ok bool = false
 	var out string
+    defer wg.Done()
 
 	if !processRetry(event) {
 		return
@@ -94,7 +97,7 @@ func loadFromFile(file string, data *[]Event) error {
 func saveState(queue chan Event) {
 	var events []Event
 	log.Printf("[INFO] Waiting untill events processing will done")
-	time.Sleep(time.Duration(5 * time.Second))
+    wg.Wait()
 	for {
 		select {
 		case event := <-queue:
@@ -127,6 +130,7 @@ var port string = "8080"
 var configDir string = "./config"
 var stateFile string = "/tmp/worker.state"
 var stop chan bool
+var wg sync.WaitGroup
 
 func main() {
 	log.Println("[INFO] Elastica Worker!")

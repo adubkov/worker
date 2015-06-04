@@ -5,7 +5,6 @@ import (
     "net/http"
     "fmt"
     "strings"
-    "time"
 )
 
 type HttpServer struct {}
@@ -46,7 +45,7 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 func (s *HttpServer) queueEvent(action Action, id string) {
     // Replace $1 in command pattern with id.
     action.Cmd = strings.Replace(action.Cmd, "$1", id, -1)
-    event := Event{Id: getId(), Timestamp: time.Now().Unix(), Param: id, Action: action, Attempt: 1}
+    event := NewEvent(id, action)
     log.Printf("[INFO] Add event: %s", event.Id)
     queue <- event
 }

@@ -10,6 +10,7 @@ import (
     "crypto/rand"
     "path/filepath"
     "regexp"
+    "time"
 )
 
 
@@ -19,8 +20,6 @@ type Action struct {
     Cmd  string `json:"cmd" yaml:"cmd"`
 }
 
-type Functions map[string][]Action
-
 type Event struct {
     Id        string
     Timestamp int64
@@ -28,6 +27,32 @@ type Event struct {
     Action    Action
     Attempt   int
 }
+
+func NewEvent(id string, action Action) Event {
+    ev := Event{}
+    ev.Id = ev.NewId()
+    ev.Timestamp = time.Now().Unix()
+    ev.Param = id
+    ev.Action = action
+    ev.Attempt = 1
+    return ev
+}
+
+func (ev *Event) NewId() string {
+    random := make([]byte, 1024)
+    rand.Read(random)
+    hash := fmt.Sprintf("%x", md5.Sum(random))
+    return hash
+}
+
+
+type Functions map[string][]Action
+
+func selectFunctions(action string) ([]Action, bool) {
+    result, ok := functions[action]
+    return result, ok
+}
+
 
 // Load YAML from file. Actually work only with Functions data type.
 func loadYAMLFromFile(file string, data Functions) (Functions, error) {
@@ -77,18 +102,3 @@ func loadFunctions(path string) Functions {
     PrintStruct(result)
     return result
 }
-
-
-func getId() string {
-    random := make([]byte, 1024)
-    rand.Read(random)
-    hash := fmt.Sprintf("%x", md5.Sum(random))
-    return hash
-}
-
-func selectFunctions(action string) ([]Action, bool) {
-    result, ok := functions[action]
-    return result, ok
-}
-
-
