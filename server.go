@@ -48,5 +48,5 @@ func (s *HttpServer) queueEvent(action Action, id string) {
 	action.Cmd = strings.Replace(action.Cmd, "$1", id, -1)
 	event := NewEvent(id, action)
 	log.Printf("[INFO] Add event: %s", event.Id)
-	queue <- event
+	queue.Put(event)
 }

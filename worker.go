@@ -2,78 +2,13 @@ package main
 
 import (
 	_ "expvar"
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
-	"time"
 )
-
-func processQueue(queue chan Event, stop chan bool) {
-	log.Printf("[INFO] Runing queue processing.")
-processQueue:
-	for {
-		select {
-		case event := <-queue:
-			wg.Add(1)
-			go processEvent(event, queue)
-		case <-stop:
-			log.Printf("[INFO] Stopping queue processing.")
-			break processQueue
-		}
-	}
-	// Dump current queue here.
-	saveState(queue)
-	log.Fatal("[INFO] Shutting down...")
-}
-
-func processRetry(event Event) bool {
-	if event.Attempt > 1 {
-		retryTime := int64(timeout[event.Attempt-1])
-		timeDelta := time.Now().Unix() - event.Timestamp
-		if timeDelta <= retryTime {
-			queue <- event
-			return false
-		}
-	}
-	return true
-}
-
-func processEvent(event Event, queue chan Event) {
-	var ok bool = false
-	var out string
-	defer wg.Done()
-
-	if !processRetry(event) {
-		return
-	}
-
-	switch event.Action.Type {
-	case "exec":
-		out, ok = actionExec(event)
-	case "curl":
-		out, ok = actionCurl(event)
-	default:
-		out = fmt.Sprintf("Can't handle action type: %s", event.Action.Type)
-	}
-
-	log.Printf("[INFO] Process event %s try %d: %s", event.Id, event.Attempt, out)
-
-	// If action is not executed successful, return it to queue.
-	if !ok {
-		if event.Attempt < len(timeout) {
-			event.Attempt += 1
-			event.Timestamp = time.Now().Unix()
-			queue <- event
-		} else {
-			log.Printf("[INFO] Event %s was dropped: %+v", event.Id, event.Param)
-		}
-	}
-	return
-}
 
 func saveToFile(file string, data string) error {
 	f, e := os.Create(file)
@@ -94,34 +29,16 @@ func loadFromFile(file string, data *[]Event) error {
 	return e
 }
 
-func saveState(queue chan Event) {
-	var events []Event
-	log.Printf("[INFO] Waiting untill events processing will done")
-	wg.Wait()
-	for {
-		select {
-		case event := <-queue:
-			events = append(events, event)
-		default:
-			log.Printf("[INFO] Saving events to %s", stateFile)
-			data, _ := yaml.Marshal(&events)
-			saveToFile(stateFile, string(data))
-			log.Printf("[INFO] %d events saved", len(events))
-			return
-		}
-	}
-}
-
-func signalDispatcher(queue chan Event, stop chan bool) {
+func signalDispatcher() {
 	ch := make(chan os.Signal, 1)
 	defer close(ch)
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	for range ch {
-		stop <- true
+		queue.Stop()
 	}
 }
 
-var queue chan Event
+var queue *Queue
 var actions ActionsMap
 
 // Will make retry in sec
@@ -131,14 +48,12 @@ var configDir string = "./config"
 var stateFile string = "/tmp/worker.state"
 var stop chan bool
 var wg sync.WaitGroup
+var queueSize int = 10000
 
 func main() {
 	log.Println("[INFO] Elastica Worker!")
 
-	queue = make(chan Event, 10000)
-	stop = make(chan bool, 1)
-	defer close(queue)
-	defer close(stop)
+    queue = NewQueue(queueSize)
 
 	// Load configuration
 	actions = NewActionsMap(configDir)
@@ -147,14 +62,14 @@ func main() {
 	loadedEvents := []Event{}
 	loadFromFile(stateFile, &loadedEvents)
 	for _, event := range loadedEvents {
-		queue <- event
+		queue.Put(event)
 	}
 
 	// Process events queue
-	go processQueue(queue, stop)
+	go queue.Process()
 
 	// Catch SIGINT and SIGTERM
-	go signalDispatcher(queue, stop)
+	go signalDispatcher()
 
 	// Run HTTP server
 	new(HttpServer).Run(port)
