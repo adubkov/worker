@@ -1,8 +1,6 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -53,15 +51,12 @@ func (am *ActionsMap) loadActions(path string) {
 	// Load all yaml files in dir
 	for _, file := range files {
 		file_name := path + "/" + file
-		t, e := am.loadFromFile(file_name, Actions{})
-		if e != nil {
-			log.Printf("[FAILED] Loading %s", file_name)
-			os.Exit(1)
-		}
+		a := Actions{}
+		loadFromFile(file_name, &a)
 		log.Printf("[INFO] Loaded %s", file_name)
 
 		// Merge
-		for k, v := range t {
+		for k, v := range a {
 			result[k] = v
 		}
 	}
@@ -69,14 +64,4 @@ func (am *ActionsMap) loadActions(path string) {
 	log.Printf("[INFO] %d Functions loaded", len(result))
 	PrintStruct(result)
 	am.list = result
-}
-
-// Load from YAML file. Actually work only with Functions data type.
-func (am *ActionsMap) loadFromFile(file string, data Actions) (Actions, error) {
-	f, e := ioutil.ReadFile(file)
-	if e != nil {
-		log.Fatal("[CRITICAL] File read error: %v", e)
-	}
-	e = yaml.Unmarshal(f, &data)
-	return data, e
 }
