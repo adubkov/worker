@@ -33,7 +33,7 @@ func main() {
 	// Load configuration
 	actions = NewActionsMap(configDir)
 
-    queue = NewQueue(queueSize, queueFile)
+	queue = NewQueue(queueSize, queueFile)
 
 	// Process events queue
 	go queue.Process()

@@ -35,10 +35,10 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 		// respond as OK if 'id' is exist and not nil
-        res.WriteHeader(200)
+		res.WriteHeader(200)
 		fmt.Fprintf(res, "OK")
 	} else {
-        res.WriteHeader(400)
+		res.WriteHeader(400)
 		fmt.Fprintf(res, "FAIL")
 	}
 }
