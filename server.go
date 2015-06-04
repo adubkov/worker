@@ -17,7 +17,6 @@ func (s *HttpServer) Run(port string) {
 
 func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
-	log.Printf("[INFO] Parsed request: %s", req.URL)
 	_, ok := req.Form["id"]
 	if ok && len(req.Form["id"][0]) > 0 {
 		id := req.Form["id"][0]
@@ -36,8 +35,10 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 		// respond as OK if 'id' is exist and not nil
+        res.WriteHeader(200)
 		fmt.Fprintf(res, "OK")
 	} else {
+        res.WriteHeader(400)
 		fmt.Fprintf(res, "FAIL")
 	}
 }
