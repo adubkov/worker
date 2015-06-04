@@ -106,7 +106,7 @@ func saveState(queue chan Event) {
 			log.Printf("[INFO] Saving events to %s", stateFile)
 			data, _ := yaml.Marshal(&events)
 			saveToFile(stateFile, string(data))
-			log.Printf("[INFO] Saved %d events", len(events))
+			log.Printf("[INFO] %d events saved", len(events))
 			return
 		}
 	}
@@ -122,7 +122,7 @@ func signalDispatcher(queue chan Event, stop chan bool) {
 }
 
 var queue chan Event
-var functions Functions
+var actions ActionsMap
 
 // Will make retry in sec
 var timeout = [...]int{1, 5, 15, 30, 60, 180, 3600, 86400}
@@ -141,7 +141,7 @@ func main() {
 	defer close(stop)
 
 	// Load configuration
-	functions = loadFunctions(configDir)
+    actions = NewActionsMap(configDir)
 
 	// Load saved state
 	loadedEvents := []Event{}

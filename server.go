@@ -25,7 +25,7 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 
         for _, v := range req.Form {
             for _, action := range v {
-                function, ok := selectFunctions(action)
+                function, ok := actions.Get(action)
                 if !ok {
                     continue
                 }
