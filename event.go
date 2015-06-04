@@ -16,12 +16,12 @@ type Event struct {
 }
 
 func NewEvent(id string, action Action) Event {
-	ev := Event{}
+	ev := Event{
+		Timestamp: time.Now().Unix(),
+		Param:     id,
+		Action:    action,
+		Attempt:   1}
 	ev.Id = ev.NewId()
-	ev.Timestamp = time.Now().Unix()
-	ev.Param = id
-	ev.Action = action
-	ev.Attempt = 1
 	return ev
 }
 
