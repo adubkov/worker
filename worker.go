@@ -2,31 +2,10 @@ package main
 
 import (
 	_ "expvar"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
 )
-
-func saveToFile(file string, data string) error {
-	f, e := os.Create(file)
-	defer f.Close()
-	if e != nil {
-		return e
-	}
-	f.WriteString(data)
-	return e
-}
-
-func loadFromFile(file string, data *[]Event) error {
-	f, e := ioutil.ReadFile(file)
-	if e != nil {
-		return e
-	}
-	yaml.Unmarshal([]byte(f), data)
-	return e
-}
 
 func signalDispatcher() {
 	ch := make(chan os.Signal, 1)

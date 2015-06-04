@@ -5,7 +5,6 @@ import (
     "time"
     "log"
     "sync"
-    "gopkg.in/yaml.v2"
 )
 
 type Queue struct {
@@ -111,8 +110,7 @@ func (q *Queue) save() {
             events = append(events, event)
         default:
             log.Printf("[INFO] Saving events to %s", q.file)
-            data, _ := yaml.Marshal(&events)
-            saveToFile(q.file, string(data))
+            saveToFile(q.file, &events)
             log.Printf("[INFO] %d events saved", len(events))
             return
         }
