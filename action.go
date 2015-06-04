@@ -1,50 +1,19 @@
 package main
 
 import (
-    "crypto/md5"
     "os"
-    "fmt"
     "log"
     "io/ioutil"
     "gopkg.in/yaml.v2"
-    "crypto/rand"
     "path/filepath"
     "regexp"
-    "time"
 )
-
 
 // Action for Functions.
 type Action struct {
     Type string `json:"type" yaml:"type"`
     Cmd  string `json:"cmd" yaml:"cmd"`
 }
-
-type Event struct {
-    Id        string
-    Timestamp int64
-    Param     string
-    Action    Action
-    Attempt   int
-}
-
-func NewEvent(id string, action Action) Event {
-    ev := Event{}
-    ev.Id = ev.NewId()
-    ev.Timestamp = time.Now().Unix()
-    ev.Param = id
-    ev.Action = action
-    ev.Attempt = 1
-    return ev
-}
-
-func (ev *Event) NewId() string {
-    random := make([]byte, 1024)
-    rand.Read(random)
-    hash := fmt.Sprintf("%x", md5.Sum(random))
-    return hash
-}
-
 
 type Actions map[string][]Action
 type ActionsMap struct{
