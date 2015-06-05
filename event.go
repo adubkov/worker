@@ -12,7 +12,7 @@ import (
 type Event struct {
 	Id        string
 	Timestamp int64
-	Param     string 
+	Param     string
 	Action    Action
 	Attempt   int
 }

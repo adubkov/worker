@@ -51,7 +51,7 @@ processQueue:
 		case event := <-q.queue:
 			q.wg.Add(1)
 			go q.processEvent(event)
-        // If receive `true` from stop channel, we should stop processing.
+			// If receive `true` from stop channel, we should stop processing.
 		case <-q.stop:
 			log.Printf("[INFO] Stopping queue processing...")
 			break processQueue
@@ -68,12 +68,12 @@ func (q *Queue) processEvent(event Event) {
 	var out string
 	defer q.wg.Done()
 
-    // Check if it's time to process event or put it back to queue and return.
+	// Check if it's time to process event or put it back to queue and return.
 	if !q.processRetry(event) {
 		return
 	}
 
-    // Call apropriate action function.
+	// Call apropriate action function.
 	switch event.Action.Type {
 	case "exec":
 		out, ok = actionExec(event)
@@ -87,7 +87,7 @@ func (q *Queue) processEvent(event Event) {
 
 	// If action is not executed successful,
 	if !ok {
-        // Check if we should back event to queue and wait or drop it.
+		// Check if we should back event to queue and wait or drop it.
 		if event.Attempt < len(timeout) {
 			event.Attempt += 1
 			event.Timestamp = time.Now().Unix()
@@ -103,9 +103,9 @@ func (q *Queue) processRetry(event Event) bool {
 	if event.Attempt > 1 {
 		retryTime := int64(timeout[event.Attempt-1])
 		timeDelta := time.Now().Unix() - event.Timestamp
-        // If retryTime is not exited limit, 
+		// If retryTime is not exited limit,
 		if timeDelta <= retryTime {
-            // put it back to queue.
+			// put it back to queue.
 			q.Put(event)
 			return false
 		}
@@ -115,14 +115,14 @@ func (q *Queue) processRetry(event Event) bool {
 
 // Save unprocessed events in file.
 func (q *Queue) save() {
-    // Make temp variable for events.
+	// Make temp variable for events.
 	var events []Event
 	log.Printf("[INFO] Waiting untill events processing will done")
 	q.wg.Wait()
 	for {
 		select {
 		case event := <-q.queue:
-            // Fill temp variable with events from queue.
+			// Fill temp variable with events from queue.
 			events = append(events, event)
 		default:
 			log.Printf("[INFO] Saving events to %s", q.file)
@@ -142,7 +142,7 @@ func (q *Queue) load() {
 	if nil != loadFromFile(q.file, &events) {
 		log.Printf("[WARN] Can not load %s", q.file)
 	}
-    // Put events into queue.
+	// Put events into queue.
 	for _, event := range events {
 		q.Put(event)
 	}

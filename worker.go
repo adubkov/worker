@@ -9,11 +9,11 @@ import (
 
 // Catch os signals and process them.
 func signalDispatcher() {
-    // Make a channel for signals.
+	// Make a channel for signals.
 	ch := make(chan os.Signal, 1)
 	defer close(ch)
 
-    // We want catch only SIGINT and SIGKILL.
+	// We want catch only SIGINT and SIGKILL.
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	for range ch {
 		queue.Stop()

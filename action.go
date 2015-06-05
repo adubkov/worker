@@ -37,9 +37,9 @@ func (am *ActionsMap) Get(action string) ([]Action, bool) {
 }
 
 // Search files in path, by regexp patthern.
-func (am *ActionsMap) search(path, pattern string) []string{
+func (am *ActionsMap) search(path, pattern string) []string {
 	var files []string
-    // Walk thought all files in path.
+	// Walk thought all files in path.
 	filepath.Walk(path, func(p string, f os.FileInfo, _ error) error {
 		if !f.IsDir() {
 			isYamlFile, _ := regexp.MatchString(pattern, f.Name())
@@ -50,7 +50,7 @@ func (am *ActionsMap) search(path, pattern string) []string{
 		return nil
 	})
 	log.Printf("[INFO] Found %d files to load from '%s'", len(files), path)
-    return files
+	return files
 }
 
 // Load all actions files and combine them.
@@ -58,7 +58,7 @@ func (am *ActionsMap) loadActions(path string) {
 	result := Actions{}
 
 	// Find all .yaml files in path.
-    files := am.search(path, ".yaml$")
+	files := am.search(path, ".yaml$")
 
 	// Load all yaml files in path.
 	for _, file := range files {

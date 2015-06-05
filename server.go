@@ -29,7 +29,7 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 
 		for _, v := range req.Form {
 			for _, param := range v {
-                // Get action if it's exist.
+				// Get action if it's exist.
 				action, ok := actions.Get(param)
 				if !ok {
 					continue
@@ -52,9 +52,9 @@ func (s *HttpServer) rootHandler(res http.ResponseWriter, req *http.Request) {
 func (s *HttpServer) queueEvent(action Action, id string) {
 	// Replace $1 in command pattern with 'id'.
 	action.Cmd = strings.Replace(action.Cmd, "$1", id, -1)
-    // Make new event.
+	// Make new event.
 	event := NewEvent(id, action)
-    // Put event into the queue.
+	// Put event into the queue.
 	log.Printf("[INFO] Add event: %s", event.Id)
 	queue.Put(event)
 }
