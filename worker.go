@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "expvar"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -22,21 +23,22 @@ func signalDispatcher() {
 
 // Retry in sec.
 var timeout = [...]int{1, 3, 5, 15, 30, 60, 300, 900, 3600, 3600, 3600, 86400}
-var port string = "8080"
-var configDir string = "./config"
-var queueFile string = "/tmp/worker.state"
-var queueSize int = 10000
+var port *string = flag.String("port", "8312", "Port [8312]")
+var configDir *string = flag.String("config", "/etc/worker", "Path with configuration /etc/worker")
+var queueFile *string = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state")
+var queueSize *int = flag.Int("queue", 10000, "Queue size (10000)")
 var queue *Queue
 var actions ActionsMap
 
 func main() {
 	log.Println("[INFO] Elastica Worker!")
+	flag.Parse()
 
 	// Load configuration
-	actions = NewActionsMap(configDir)
+	actions = NewActionsMap(*configDir)
 
 	// Make queue object
-	queue = NewQueue(queueSize, queueFile)
+	queue = NewQueue(*queueSize, *queueFile)
 
 	// Run queue events process
 	go queue.Process()
@@ -45,5 +47,5 @@ func main() {
 	go signalDispatcher()
 
 	// Run HTTP server
-	new(HttpServer).Run(port)
+	new(HttpServer).Run(*port)
 }
