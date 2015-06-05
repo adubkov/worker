@@ -23,10 +23,10 @@ func signalDispatcher() {
 
 // Retry in sec.
 var timeout = [...]int{1, 3, 5, 15, 30, 60, 300, 900, 3600, 3600, 3600, 86400}
-var port *string = flag.String("port", "8312", "Port [8312]")
+var port *int = flag.Int("port", 8312, "Listen port")
 var configDir *string = flag.String("config", "/etc/worker", "Path with configuration /etc/worker")
 var queueFile *string = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state")
-var queueSize *int = flag.Int("queue", 10000, "Queue size (10000)")
+var queueSize *int = flag.Int("queue", 10000, "Queue size")
 var queue *Queue
 var actions ActionsMap
 

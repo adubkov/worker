@@ -11,10 +11,11 @@ import (
 type HttpServer struct{}
 
 // Run listener on port.
-func (s *HttpServer) Run(port string) {
-	log.Printf("[INFO] Runing http server on port: %s", port)
+func (s *HttpServer) Run(port int) {
+	log.Printf("[INFO] Runing http server on port: %d", port)
 	http.HandleFunc("/", s.rootHandler)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	p := fmt.Sprintf(":%d", port)
+	log.Fatal(http.ListenAndServe(p, nil))
 }
 
 // Handle request to root ('/').
