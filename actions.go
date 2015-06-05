@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Execute command in bash and return output string.
 func actionExec(event Event) (string, bool) {
 	// Make command structure
 	cmd := exec.Command("sh", "-c", event.Action.Cmd)
@@ -18,6 +19,7 @@ func actionExec(event Event) (string, bool) {
 	return string(out), true
 }
 
+// Make http get request and return result string.
 func actionCurl(event Event) (string, bool) {
 	// Set timeout for connection
 	client := http.Client{

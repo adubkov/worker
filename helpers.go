@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// Save data to file in yaml format.
 func saveToFile(file string, data interface{}) error {
 	strData, e := yaml.Marshal(data)
 	if e != nil {
@@ -20,6 +21,8 @@ func saveToFile(file string, data interface{}) error {
 	return nil
 }
 
+// Load data from file in yaml format.
+// Object structure should match yaml structure.
 func loadFromFile(file string, data interface{}) error {
 	f, e := ioutil.ReadFile(file)
 	if e != nil {
@@ -30,7 +33,7 @@ func loadFromFile(file string, data interface{}) error {
 }
 
 // Pretty print structure as YAML.
-func PrintStruct(v interface{}) {
+func prettyPrint(v interface{}) {
 	var out bytes.Buffer
 
 	data, e := json.Marshal(v)

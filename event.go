@@ -7,14 +7,17 @@ import (
 	"time"
 )
 
+// Describe event which should be happen.
+// `Param` now mostly used for specify id of host.
 type Event struct {
 	Id        string
 	Timestamp int64
-	Param     string
+	Param     string 
 	Action    Action
 	Attempt   int
 }
 
+// Make new event and initialize it.
 func NewEvent(id string, action Action) Event {
 	ev := Event{
 		Timestamp: time.Now().Unix(),
@@ -25,6 +28,7 @@ func NewEvent(id string, action Action) Event {
 	return ev
 }
 
+// Return random md5 hash.
 func (ev *Event) NewId() string {
 	random := make([]byte, 1024)
 	rand.Read(random)

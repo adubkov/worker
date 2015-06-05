@@ -7,22 +7,25 @@ import (
 	"os/signal"
 )
 
+// Catch os signals and process them.
 func signalDispatcher() {
+    // Make a channel for signals.
 	ch := make(chan os.Signal, 1)
 	defer close(ch)
+
+    // We want catch only SIGINT and SIGKILL.
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	for range ch {
 		queue.Stop()
 	}
 }
 
-// Will make retry in sec
-var timeout = [...]int{1, 5, 15, 30, 60, 180, 3600, 86400}
+// Retry in sec.
+var timeout = [...]int{1, 3, 5, 15, 30, 60, 300, 900, 3600, 3600, 3600, 86400}
 var port string = "8080"
 var configDir string = "./config"
 var queueFile string = "/tmp/worker.state"
 var queueSize int = 10000
-
 var queue *Queue
 var actions ActionsMap
 
