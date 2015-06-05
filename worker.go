@@ -21,17 +21,24 @@ func signalDispatcher() {
 	}
 }
 
+const appVersion = "0.0.1"
+
 // Retry in sec.
 var timeout = [...]int{1, 3, 5, 15, 30, 60, 300, 900, 3600, 3600, 3600, 86400}
-var port *int = flag.Int("port", 8312, "Listen port")
-var configDir *string = flag.String("config", "/etc/worker", "Path with configuration /etc/worker")
-var queueFile *string = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state")
-var queueSize *int = flag.Int("queue", 10000, "Queue size")
+var port *int
+var configDir *string
+var queueFile *string
+var queueSize *int
 var queue *Queue
 var actions ActionsMap
 
 func main() {
-	log.Println("[INFO] Elastica Worker!")
+	log.Printf("[INFO] Elastica Worker! (%s)", appVersion)
+
+	port = flag.Int("port", 8312, "Listen port")
+	configDir = flag.String("config", "/etc/worker", "Path with configuration /etc/worker")
+	queueFile = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state")
+	queueSize = flag.Int("queue", 10000, "Queue size")
 	flag.Parse()
 
 	// Load configuration

@@ -40,7 +40,11 @@ func (am *ActionsMap) Get(action string) ([]Action, bool) {
 func (am *ActionsMap) search(path, pattern string) []string {
 	var files []string
 	// Walk thought all files in path.
-	filepath.Walk(path, func(p string, f os.FileInfo, _ error) error {
+	filepath.Walk(path, func(p string, f os.FileInfo, e error) error {
+		if e != nil {
+			log.Printf("[ERROR] %s", e)
+			os.Exit(1)
+		}
 		if !f.IsDir() {
 			isYamlFile, _ := regexp.MatchString(pattern, f.Name())
 			if isYamlFile {
