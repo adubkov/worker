@@ -66,7 +66,7 @@ func (am *ActionsMap) loadActions(path string) {
 
 	// Load all yaml files in path.
 	for _, file := range files {
-		file_name := path + "/" + file
+		file_name := path + "/worker.d/" + file
 		a := Actions{}
 		if nil != loadFromFile(file_name, &a) {
 			log.Fatalf("[ERROR] Can not load %s", file_name)

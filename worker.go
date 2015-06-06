@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+    "syscall"
 )
 
 // Catch os signals and process them.
@@ -15,7 +16,7 @@ func signalDispatcher() {
 	defer close(ch)
 
 	// We want catch only SIGINT and SIGKILL.
-	signal.Notify(ch, os.Interrupt, os.Kill)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	for range ch {
 		queue.Stop()
 	}
@@ -35,9 +36,10 @@ var actions ActionsMap
 func main() {
 	log.Printf("[INFO] Elastica Worker! (%s)", appVersion)
 
+	// Parse arguments
 	port = flag.Int("port", 8312, "Listen port")
-	configDir = flag.String("config", "/etc/worker", "Path with configuration /etc/worker")
-	queueFile = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state")
+	configDir = flag.String("config", "/etc/worker", "Path with configuration (/etc/worker)")
+	queueFile = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state)")
 	queueSize = flag.Int("queue", 10000, "Queue size")
 	flag.Parse()
 

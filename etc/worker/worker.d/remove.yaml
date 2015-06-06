@@ -1,0 +1,7 @@
+remove:
+  - 
+    type:   "curl"
+    cmd:    "http://app.local/$1/remove/"
+  -
+    type:   "exec"
+    cmd:    "python /etc/worker/scripts/salt-remove.py $1"
