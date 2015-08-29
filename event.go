@@ -4,23 +4,22 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"fmt"
-	"time"
 )
 
 // Describe event which should be happen.
 // `Param` now mostly used for specify id of host.
 type Event struct {
-	Id        string
-	Timestamp int64
-	Param     string
-	Action    Action
-	Attempt   int
+	Id          string
+	Expiration  int64
+	Param       string
+	Action      Action
+	Attempt     int
 }
 
 // Make new event and initialize it.
 func NewEvent(id string, action Action) Event {
 	ev := Event{
-		Timestamp: time.Now().Unix(),
+		Expiration: 0,
 		Param:     id,
 		Action:    action,
 		Attempt:   1}
