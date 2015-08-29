@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
-    "time"
+	"time"
 )
 
 // Queue object keep and process events.
@@ -47,18 +47,18 @@ func (q *Queue) Process() {
 	log.Printf("[INFO] Runing queue processing.")
 processQueue:
 	for {
-        select {
-            case <-time.After(200 * time.Millisecond):
-            select {
-                case event := <-q.queue:
-                    q.wg.Add(1)
-                    go q.processEvent(event)
-                // If receive `true` from stop channel, we should stop processing.
-                case <-q.stop:
-                    log.Printf("[INFO] Stopping queue processing...")
-                    break processQueue
-            }
-        }
+		select {
+		case <-time.After(200 * time.Millisecond):
+			select {
+			case event := <-q.queue:
+				q.wg.Add(1)
+				go q.processEvent(event)
+			// If receive `true` from stop channel, we should stop processing.
+			case <-q.stop:
+				log.Printf("[INFO] Stopping queue processing...")
+				break processQueue
+			}
+		}
 	}
 	// When processing stopped, we should save unprocessed events.
 	q.save()
@@ -73,8 +73,8 @@ func (q *Queue) processEvent(event Event) {
 
 	// Check if it's time to process event or put it back to queue and return.
 	if !q.processRetry(event) {
-	    return
-    }
+		return
+	}
 
 	// Call apropriate action function.
 	switch event.Action.Type {
@@ -103,12 +103,12 @@ func (q *Queue) processEvent(event Event) {
 
 // Return true if it's time to try process event, else return false.
 func (q *Queue) processRetry(event Event) bool {
-    if event.Expiration > 0 {
-        event.Expiration -= 200 * 1e+6
-        // put it back to queue.
-        q.Put(event)
-        return false
-    }
+	if event.Expiration > 0 {
+		event.Expiration -= 200 * 1e+6
+		// put it back to queue.
+		q.Put(event)
+		return false
+	}
 	return true
 }
 
@@ -138,10 +138,10 @@ func (q *Queue) save() {
 // Load saved events from file.
 func (q *Queue) load() {
 	events := []Event{}
-    e := loadFromFile(q.file, &events)
-    if e != nil {
+	e := loadFromFile(q.file, &events)
+	if e != nil {
 		log.Printf("[WARN] %s", e)
-        return
+		return
 	}
 	// Put events into queue.
 	for _, event := range events {

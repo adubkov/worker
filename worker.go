@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-    "syscall"
+	"syscall"
 )
 
 // Catch os signals and process them.
@@ -35,7 +35,7 @@ var actions ActionsMap
 
 func main() {
 	log.Printf("[INFO] Elastica Worker! (%s)", appVersion)
-    log.Printf("[INFO] PID: %d", os.Getpid())
+	log.Printf("[INFO] PID: %d", os.Getpid())
 
 	// Parse arguments
 	port = flag.Int("port", 8312, "Listen port")
