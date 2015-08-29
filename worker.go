@@ -35,6 +35,7 @@ var actions ActionsMap
 
 func main() {
 	log.Printf("[INFO] Elastica Worker! (%s)", appVersion)
+    log.Printf("[INFO] PID: %d", os.Getpid())
 
 	// Parse arguments
 	port = flag.Int("port", 8312, "Listen port")
@@ -42,6 +43,8 @@ func main() {
 	queueFile = flag.String("save", "/tmp/worker.state", "File to save queue (/tmp/worker.state)")
 	queueSize = flag.Int("queue", 10000, "Queue size")
 	flag.Parse()
+
+    // TODO: Add /tmp/worker.state creation
 
 	// Load configuration
 	actions = NewActionsMap(*configDir)

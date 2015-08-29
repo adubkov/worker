@@ -68,8 +68,9 @@ func (am *ActionsMap) loadActions(path string) {
 	for _, file := range files {
 		file_name := path + "/worker.d/" + file
 		a := Actions{}
-		if nil != loadFromFile(file_name, &a) {
-			log.Fatalf("[ERROR] Can not load %s", file_name)
+        e := loadFromFile(file_name, &a)
+        if e != nil {
+			log.Fatalf("[ERROR] %s", e)
 		}
 		log.Printf("[INFO] Loading actions from: %s", file_name)
 

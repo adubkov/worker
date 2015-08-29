@@ -139,8 +139,9 @@ func (q *Queue) save() {
 // Load saved events from file.
 func (q *Queue) load() {
 	events := []Event{}
-	if nil != loadFromFile(q.file, &events) {
-		log.Printf("[WARN] Can not load %s", q.file)
+    e := loadFromFile(q.file, &events)
+    if e != nil {
+		log.Printf("[WARN] %s", e)
 	}
 	// Put events into queue.
 	for _, event := range events {
