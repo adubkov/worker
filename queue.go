@@ -47,15 +47,18 @@ func (q *Queue) Process() {
 	log.Printf("[INFO] Runing queue processing.")
 processQueue:
 	for {
-		select {
-		case event := <-q.queue:
-			q.wg.Add(1)
-			go q.processEvent(event)
-			// If receive `true` from stop channel, we should stop processing.
-		case <-q.stop:
-			log.Printf("[INFO] Stopping queue processing...")
-			break processQueue
-		}
+        select {
+            case <-time.After(200 * time.Millisecond):
+                select {
+                case event := <-q.queue:
+                    q.wg.Add(1)
+                    go q.processEvent(event)
+                    // If receive `true` from stop channel, we should stop processing.
+                case <-q.stop:
+                    log.Printf("[INFO] Stopping queue processing...")
+                    break processQueue
+                }
+        }
 	}
 	// When processing stopped, we should save unprocessed events.
 	q.save()
@@ -101,7 +104,7 @@ func (q *Queue) processEvent(event Event) {
 // Return true if it's time to try process event, else return false.
 func (q *Queue) processRetry(event Event) bool {
 	if event.Attempt > 1 {
-		retryTime := int64(timeout[event.Attempt-1])
+		retryTime := int64(timeout[event.Attempt-1]-1)
 		timeDelta := time.Now().Unix() - event.Timestamp
 		// If retryTime is not exited limit,
 		if timeDelta <= retryTime {
@@ -142,6 +145,7 @@ func (q *Queue) load() {
     e := loadFromFile(q.file, &events)
     if e != nil {
 		log.Printf("[WARN] %s", e)
+        return
 	}
 	// Put events into queue.
 	for _, event := range events {
