@@ -9,10 +9,11 @@ import (
 
 // Queue object keep and process events.
 type Queue struct {
-	queue chan Event
-	stop  chan bool
-	wg    sync.WaitGroup
-	file  string
+	queue  chan Event
+	stop   chan bool
+	events []Event
+	wg     sync.WaitGroup
+	file   string
 }
 
 // Make new queue and init it.
@@ -20,6 +21,7 @@ func NewQueue(size int, file string) *Queue {
 	q := new(Queue)
 	q.queue = make(chan Event, size)
 	q.stop = make(chan bool, 1)
+	q.events = []Event{}
 	q.file = file
 	q.load()
 	return q
@@ -45,18 +47,32 @@ func (q *Queue) Process() {
 	defer close(q.queue)
 	defer close(q.stop)
 	log.Printf("[INFO] Runing queue processing.")
-processQueue:
+mainLoop:
 	for {
 		select {
 		case <-time.After(200 * time.Millisecond):
-			select {
-			case event := <-q.queue:
-				q.wg.Add(1)
-				go q.processEvent(event)
-			// If receive `true` from stop channel, we should stop processing.
-			case <-q.stop:
-				log.Printf("[INFO] Stopping queue processing...")
-				break processQueue
+			q.events = []Event{}
+		processQueue:
+			for {
+				select {
+				case event := <-q.queue:
+					// Process the event it's a time for that
+					if q.isReadyToProcess(event) {
+						q.wg.Add(1)
+						go q.processEvent(event)
+					}
+				// If receive `true` from stop channel, we should stop processing.
+				case <-q.stop:
+					log.Printf("[INFO] Stopping queue processing...")
+					break mainLoop
+				default:
+					break processQueue
+				}
+			}
+			q.wg.Wait()
+			// Put events into queue.
+			for _, event := range q.events {
+				q.Put(event)
 			}
 		}
 	}
@@ -71,11 +87,6 @@ func (q *Queue) processEvent(event Event) {
 	var out string
 	defer q.wg.Done()
 
-	// Check if it's time to process event or put it back to queue and return.
-	if !q.processRetry(event) {
-		return
-	}
-
 	// Call apropriate action function.
 	switch event.Action.Type {
 	case "exec":
@@ -86,7 +97,8 @@ func (q *Queue) processEvent(event Event) {
 		out = fmt.Sprintf("Can't handle action type: %s", event.Action.Type)
 	}
 
-	log.Printf("[INFO] Process event %s try %d: %s", event.Id, event.Attempt, out)
+	log.Printf("[INFO] Process event for action: '%s', param: '%s', id: '%s', try: %d, status: %s",
+		event.Action.Type, event.Param, event.Id, event.Attempt, out)
 
 	// If action is not executed successful,
 	if !ok {
@@ -94,7 +106,7 @@ func (q *Queue) processEvent(event Event) {
 		if event.Attempt < len(timeout) {
 			event.Attempt += 1
 			event.Expiration = int64(timeout[event.Attempt-1]) * 1e+9
-			q.Put(event)
+			q.events = append(q.events, event)
 		} else {
 			log.Printf("[INFO] Event %s was dropped: %+v", event.Id, event.Param)
 		}
@@ -102,11 +114,11 @@ func (q *Queue) processEvent(event Event) {
 }
 
 // Return true if it's time to try process event, else return false.
-func (q *Queue) processRetry(event Event) bool {
+func (q *Queue) isReadyToProcess(event Event) bool {
 	if event.Expiration > 0 {
 		event.Expiration -= 200 * 1e+6
 		// put it back to queue.
-		q.Put(event)
+		q.events = append(q.events, event)
 		return false
 	}
 	return true

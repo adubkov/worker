@@ -22,10 +22,10 @@ func signalDispatcher() {
 	}
 }
 
-const appVersion = "0.0.2"
+const appVersion = "0.0.3"
 
 // Retry in sec.
-var timeout = [...]int{1, 3, 5, 15, 30, 60, 60, 60, 60}
+var timeout = [...]int{1, 3, 5, 15, 30, 60, 60, 60, 600, 3600, 86400}
 var port *int
 var configDir *string
 var queueFile *string
