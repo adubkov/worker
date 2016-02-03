@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os/exec"
@@ -14,7 +15,8 @@ func actionExec(event Event) (string, bool) {
 	// Execute process
 	out, e := cmd.Output()
 	if e != nil {
-		return "FAIL", false
+		msg := fmt.Sprintf("%s", e)
+		return msg, false
 	}
 	return string(out), true
 }
